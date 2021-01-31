@@ -25,9 +25,8 @@ object DBSchema {
     def url: Rep[String] = column[String]("URL")
     def description: Rep[String] = column[String]("DESCRIPTION")
     def postedBy: Rep[Int] = column[Int]("USER_ID")
-    def createdAt: Rep[DateTime] = column[DateTime]("CREATED_AT")
 
-    override def * : ProvenShape[Link] = (id, url, description, postedBy, createdAt).mapTo[Link]
+    override def * : ProvenShape[Link] = (id, url, description, postedBy).mapTo[Link]
 
     def postedByFK: ForeignKeyQuery[UsersTable, User] = foreignKey("postedBy_FK", postedBy, Users)(_.id)
   }
@@ -72,9 +71,9 @@ object DBSchema {
     ),
     Links.forceInsertAll(
       Seq(
-        Link(1, "http://howtographql.com", "Awesome community driven GraphQL tutorial", 1, DateTime(2020, 9, 12)),
-        Link(2, "http://graphql.org", "Official GraphQL web page", 2, DateTime(2020, 10, 1)),
-        Link(3, "https://facebook.github.io/graphql/", "GraphQL specification", 1, DateTime(2020, 12, 30))
+        Link(1, "http://howtographql.com", "Awesome community driven GraphQL tutorial", 1),
+        Link(2, "http://graphql.org", "Official GraphQL web page", 2),
+        Link(3, "https://facebook.github.io/graphql/", "GraphQL specification", 1)
       )
     ),
     Votes.forceInsertAll(

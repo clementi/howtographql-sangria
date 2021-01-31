@@ -40,7 +40,6 @@ object Types {
 
   lazy val LinkType: ObjectType[Unit, Link] = deriveObjectType[Unit, Link](
     Interfaces(IdentifiableType),
-    ReplaceField("createdAt", Field("createdAt", GraphQLDateTime, resolve = _.value.createdAt)),
     ReplaceField("postedBy", Field("postedBy", UserType, resolve = c => usersFetcher.defer(c.value.postedBy))),
     AddFields(
       Field("votes", ListType(VoteType), resolve = c => votesFetcher.deferRelSeq(voteByLinkRel, c.value.id))
@@ -72,6 +71,13 @@ object Types {
   val NameArg: Argument[String] = Argument("name", StringType)
   val AuthProviderArg: Argument[AuthProviderSignupData] = Argument("authProvider", AuthProviderSignupDataInputType)
 
+  val UrlArg: Argument[String] = Argument("url", StringType)
+  val DescArg: Argument[String] = Argument("description", StringType)
+  val PostedByArg: Argument[Int] = Argument("postedById", IntType)
+
+  val LinkIdArg: Argument[Int] = Argument("linkId", IntType)
+  val UserIdArg: Argument[Int] = Argument("userId", IntType)
+
   val MutationType: ObjectType[AppContext, Unit] = ObjectType(
     "Mutation",
     fields[AppContext, Unit](
@@ -80,6 +86,18 @@ object Types {
         UserType,
         arguments = NameArg :: AuthProviderArg :: Nil,
         resolve = c => c.ctx.dao.createUser(c.arg(NameArg), c.arg(AuthProviderArg))
+      ),
+      Field(
+        "createLink",
+        LinkType,
+        arguments = UrlArg :: DescArg :: PostedByArg :: Nil,
+        resolve = c => c.ctx.dao.createLink(c.arg(UrlArg), c.arg(DescArg), c.arg(PostedByArg))
+      ),
+      Field(
+        "createVote",
+        VoteType,
+        arguments = LinkIdArg :: UserIdArg :: Nil,
+        resolve = c => c.ctx.dao.createVot(c.arg(LinkIdArg), c.arg(UserIdArg))
       )
     )
   )

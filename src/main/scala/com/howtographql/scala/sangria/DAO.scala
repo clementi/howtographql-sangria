@@ -26,7 +26,7 @@ class DAO(db: Database) {
           case (SimpleRelation("byUser"), ids: Seq[Int]) => vote.userId inSet ids
           case (SimpleRelation("byLink"), ids: Seq[Int]) => vote.linkId inSet ids
         }).foldLeft(true: Rep[Boolean])(_ || _)
-      } result
+      }.result
     )
   }
 
@@ -38,5 +38,21 @@ class DAO(db: Database) {
     }
 
     db.run(insertAndReturnUserQuery += newUser)
+  }
+
+  def createLink(url: String, description: String, postedBy: Int): Future[Link] = {
+    val insertAndReturnLinkQuery = (Links returning Links.map(_.id)) into {
+      (link, id) => link.copy(id = id)
+    }
+
+    db.run(insertAndReturnLinkQuery += Link(0, url, description, postedBy))
+  }
+
+  def createVot(linkId: Int, userId: Int): Future[Vote] = {
+    val insertAndReturnVoteQuery = (Votes returning Votes.map(_.id)) into {
+      (vote, id) => vote.copy(id = id)
+    }
+
+    db.run(insertAndReturnVoteQuery += Vote(0, userId, linkId))
   }
 }
