@@ -13,7 +13,11 @@ class DAO(db: Database) {
 
   def getLinksByUserIds(ids: Seq[Int]): Future[Seq[Link]] = db.run(Links.filter(_.postedBy inSet ids).result)
 
+  def allUsers: Future[Seq[User]] = db.run(Users.result)
+
   def getUsers(ids: Seq[Int]): Future[Seq[User]] = db.run(Users.filter(_.id inSet ids).result)
+
+  def allVotes: Future[Seq[Vote]] = db.run(Votes.result)
 
   def getVotes(ids: Seq[Int]): Future[Seq[Vote]] = db.run(Votes.filter(_.id inSet ids).result)
 
@@ -48,7 +52,7 @@ class DAO(db: Database) {
     db.run(insertAndReturnLinkQuery += Link(0, url, description, postedBy))
   }
 
-  def createVot(linkId: Int, userId: Int): Future[Vote] = {
+  def createVote(linkId: Int, userId: Int): Future[Vote] = {
     val insertAndReturnVoteQuery = (Votes returning Votes.map(_.id)) into {
       (vote, id) => vote.copy(id = id)
     }

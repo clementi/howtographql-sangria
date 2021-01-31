@@ -5,7 +5,7 @@ import com.howtographql.scala.sangria.AppContext
 import com.howtographql.scala.sangria.graphql.Fetchers._
 import com.howtographql.scala.sangria.graphql.GraphQLSchema.{Id, Ids}
 import com.howtographql.scala.sangria.graphql.Relations._
-import com.howtographql.scala.sangria.models.{AuthProviderEmail, AuthProviderSignupData, Authorized, DateTimeCoerceViolation, Identifiable, Link, User, Vote}
+import com.howtographql.scala.sangria.models._
 import sangria.ast.StringValue
 import sangria.macros.derive._
 import sangria.marshalling.sprayJson._
@@ -103,7 +103,7 @@ object Types {
         VoteType,
         arguments = LinkIdArg :: UserIdArg :: Nil,
         tags = Authorized :: Nil,
-        resolve = c => c.ctx.dao.createVot(c.arg(LinkIdArg), c.arg(UserIdArg))
+        resolve = c => c.ctx.dao.createVote(c.arg(LinkIdArg), c.arg(UserIdArg))
       ),
       Field(
         "login",
@@ -122,8 +122,10 @@ object Types {
       Field("allLinks", ListType(LinkType), resolve = c => c.ctx.dao.allLinks),
       Field("link", OptionType(LinkType), arguments = Id :: Nil, resolve = c => linksFetcher.deferOpt(c.arg(Id))),
       Field("links", ListType(LinkType), arguments = Ids :: Nil, resolve = c => linksFetcher.deferSeq(c.arg(Ids))),
+      Field("allUsers", ListType(UserType), resolve = c => c.ctx.dao.allUsers),
       Field("user", OptionType(UserType), arguments = Id :: Nil, resolve = c => usersFetcher.deferOpt(c.arg(Id))),
       Field("users", ListType(UserType), arguments = Ids :: Nil, resolve = c => usersFetcher.deferSeq(c.arg(Ids))),
+      Field("allVotes", ListType(VoteType), resolve = c => c.ctx.dao.allVotes),
       Field("vote", OptionType(VoteType), arguments = Id :: Nil, resolve = c => votesFetcher.deferOpt(c.arg(Id))),
       Field("votes", ListType(VoteType), arguments = Ids :: Nil, resolve = c => votesFetcher.deferSeq(c.arg(Ids)))
     )
