@@ -6,15 +6,15 @@ import akka.http.scaladsl.model.StatusCodes.{BadRequest, InternalServerError, OK
 import akka.http.scaladsl.server.Directives.complete
 import akka.http.scaladsl.server.Route
 import com.howtographql.scala.sangria.graphql.AuthMiddleware
-import com.howtographql.scala.sangria.graphql.Fetchers.Resolver
+import com.howtographql.scala.sangria.graphql.Fetchers._
 import com.howtographql.scala.sangria.graphql.GraphQLSchema.SchemaDefinition
 import com.howtographql.scala.sangria.models.{AuthenticationException, AuthorizationException}
 import sangria.ast.Document
 import sangria.execution.{ErrorWithResolver, ExceptionHandler, Executor, HandledException, QueryAnalysisError}
+import sangria.execution.deferred.DeferredResolver
 import sangria.marshalling.sprayJson._
 import sangria.parser.QueryParser
 import spray.json.{JsObject, JsString, JsValue}
-
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
 
@@ -52,7 +52,7 @@ object GraphQLServer {
       AppContext(dao),
       variables = vars,
       operationName = operation,
-      deferredResolver = Resolver,
+      deferredResolver = DeferredResolver.fetchers(linksFetcher, usersFetcher, votesFetcher),
       exceptionHandler = errorHandler,
       middleware = AuthMiddleware :: Nil
     )

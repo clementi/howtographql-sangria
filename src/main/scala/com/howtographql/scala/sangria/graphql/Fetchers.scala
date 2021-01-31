@@ -3,7 +3,7 @@ package com.howtographql.scala.sangria.graphql
 import com.howtographql.scala.sangria.AppContext
 import com.howtographql.scala.sangria.graphql.Relations.{linkByUserRel, voteByUserRel}
 import com.howtographql.scala.sangria.models.{Link, User, Vote}
-import sangria.execution.deferred.{DeferredResolver, Fetcher}
+import sangria.execution.deferred.Fetcher
 
 object Fetchers {
   val linksFetcher: Fetcher[AppContext, Link, Link, Int] = Fetcher.rel(
@@ -18,7 +18,4 @@ object Fetchers {
     (ctx, ids) => ctx.dao.getVotes(ids),
     (ctx, ids) => ctx.dao.getVotesByRelationIds(ids)
   )
-
-  val Resolver: DeferredResolver[AppContext] =
-    DeferredResolver.fetchers(linksFetcher, usersFetcher, votesFetcher)
 }
