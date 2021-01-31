@@ -1,6 +1,6 @@
 package com.howtographql.scala.sangria
 
-import akka.http.scaladsl.model.DateTime
+import sangria.execution.FieldTag
 import sangria.execution.deferred.HasId
 import sangria.validation.Violation
 
@@ -14,9 +14,7 @@ package object models {
   }
 
   case class Link(id: Int, url: String, description: String, postedBy: Int) extends Identifiable
-
   case class User(id: Int, name: String, email: String, password: String) extends Identifiable
-
   case class Vote(id: Int, userId: Int, linkId: Int) extends Identifiable
 
   case object DateTimeCoerceViolation extends Violation {
@@ -24,6 +22,10 @@ package object models {
   }
 
   case class AuthProviderEmail(email: String, password: String)
-
   case class AuthProviderSignupData(email: AuthProviderEmail)
+
+  case class AuthenticationException(message: String) extends Exception(message)
+  case class AuthorizationException(message: String) extends Exception(message)
+
+  case object Authorized extends FieldTag
 }

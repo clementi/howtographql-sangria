@@ -5,10 +5,12 @@ import akka.http.scaladsl.model.StatusCode
 import akka.http.scaladsl.model.StatusCodes.{BadRequest, InternalServerError, OK}
 import akka.http.scaladsl.server.Directives.complete
 import akka.http.scaladsl.server.Route
+import com.howtographql.scala.sangria.graphql.AuthMiddleware
 import com.howtographql.scala.sangria.graphql.Fetchers.Resolver
 import com.howtographql.scala.sangria.graphql.GraphQLSchema.SchemaDefinition
+import com.howtographql.scala.sangria.models.{AuthenticationException, AuthorizationException}
 import sangria.ast.Document
-import sangria.execution.{ErrorWithResolver, Executor, QueryAnalysisError}
+import sangria.execution.{ErrorWithResolver, ExceptionHandler, Executor, HandledException, QueryAnalysisError}
 import sangria.marshalling.sprayJson._
 import sangria.parser.QueryParser
 import spray.json.{JsObject, JsString, JsValue}
@@ -38,6 +40,11 @@ object GraphQLServer {
     }
   }
 
+  val errorHandler: ExceptionHandler = ExceptionHandler {
+    case (_, AuthenticationException(message)) => HandledException(message)
+    case (_, AuthorizationException(message)) => HandledException(message)
+  }
+
   private def executeGraphQLQuery(query: Document, operation: Option[String], vars: JsObject)(implicit ec: ExecutionContext): Future[(StatusCode, JsValue)] = {
     Executor.execute(
       SchemaDefinition,
@@ -45,7 +52,9 @@ object GraphQLServer {
       AppContext(dao),
       variables = vars,
       operationName = operation,
-      deferredResolver = Resolver
+      deferredResolver = Resolver,
+      exceptionHandler = errorHandler,
+      middleware = AuthMiddleware :: Nil
     )
       .map(OK -> _)
       .recover {

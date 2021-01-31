@@ -5,12 +5,12 @@ import com.howtographql.scala.sangria.AppContext
 import com.howtographql.scala.sangria.graphql.Fetchers._
 import com.howtographql.scala.sangria.graphql.GraphQLSchema.{Id, Ids}
 import com.howtographql.scala.sangria.graphql.Relations._
-import com.howtographql.scala.sangria.models.{AuthProviderEmail, AuthProviderSignupData, DateTimeCoerceViolation, Identifiable, Link, User, Vote}
+import com.howtographql.scala.sangria.models.{AuthProviderEmail, AuthProviderSignupData, Authorized, DateTimeCoerceViolation, Identifiable, Link, User, Vote}
 import sangria.ast.StringValue
 import sangria.macros.derive._
 import sangria.marshalling.sprayJson._
 import sangria.schema._
-import spray.json.DefaultJsonProtocol.{StringJsonFormat, jsonFormat2, jsonFormat1}
+import spray.json.DefaultJsonProtocol.{StringJsonFormat, jsonFormat1, jsonFormat2}
 import spray.json.RootJsonFormat
 
 object Types {
@@ -78,6 +78,9 @@ object Types {
   val LinkIdArg: Argument[Int] = Argument("linkId", IntType)
   val UserIdArg: Argument[Int] = Argument("userId", IntType)
 
+  val EmailArg: Argument[String] = Argument("email", StringType)
+  val PasswordArg: Argument[String] = Argument("password", StringType)
+
   val MutationType: ObjectType[AppContext, Unit] = ObjectType(
     "Mutation",
     fields[AppContext, Unit](
@@ -85,19 +88,30 @@ object Types {
         "createUser",
         UserType,
         arguments = NameArg :: AuthProviderArg :: Nil,
+        tags = Authorized :: Nil,
         resolve = c => c.ctx.dao.createUser(c.arg(NameArg), c.arg(AuthProviderArg))
       ),
       Field(
         "createLink",
         LinkType,
         arguments = UrlArg :: DescArg :: PostedByArg :: Nil,
+        tags = Authorized :: Nil,
         resolve = c => c.ctx.dao.createLink(c.arg(UrlArg), c.arg(DescArg), c.arg(PostedByArg))
       ),
       Field(
         "createVote",
         VoteType,
         arguments = LinkIdArg :: UserIdArg :: Nil,
+        tags = Authorized :: Nil,
         resolve = c => c.ctx.dao.createVot(c.arg(LinkIdArg), c.arg(UserIdArg))
+      ),
+      Field(
+        "login",
+        UserType,
+        arguments = EmailArg :: PasswordArg :: Nil,
+        resolve = c => UpdateCtx(c.ctx.login(c.arg(EmailArg), c.arg(PasswordArg))) { user =>
+          c.ctx.copy(currentUser = Some(user))
+        }
       )
     )
   )

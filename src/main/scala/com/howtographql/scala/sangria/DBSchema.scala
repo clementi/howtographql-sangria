@@ -64,9 +64,9 @@ object DBSchema {
     Votes.schema.create,
     Users.forceInsertAll(
       Seq(
-        User(1, "Murray Rothbard", "mrothbard@mises.org", "kushtr,zjxhfdg"),
-        User(2, "Ludwig von Mises", "lvmises@mises.org", "zdhf8743hkd"),
-        User(3, "Friedrich von Hayek", "fvhayek@mises.org", "87hdjfgbzfdg0-")
+        User(1, "Murray Rothbard", "mrothbard@mises.org", "liberty"),
+        User(2, "Ludwig von Mises", "lvmises@mises.org", "economics"),
+        User(3, "Friedrich von Hayek", "fvhayek@mises.org", "philosophy")
       )
     ),
     Links.forceInsertAll(

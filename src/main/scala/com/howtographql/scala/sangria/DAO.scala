@@ -55,4 +55,7 @@ class DAO(db: Database) {
 
     db.run(insertAndReturnVoteQuery += Vote(0, userId, linkId))
   }
+
+  def authenticate(email: String, password: String): Future[Option[User]] =
+    db.run(Users.filter(u => u.email === email && u.password === password).result.headOption)
 }
