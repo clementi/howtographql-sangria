@@ -25,10 +25,11 @@ object DBSchema {
     def url: Rep[String] = column[String]("URL")
     def description: Rep[String] = column[String]("DESCRIPTION")
     def postedBy: Rep[Int] = column[Int]("USER_ID")
-    def postedByFK: ForeignKeyQuery[UsersTable, User] = foreignKey("postedBy_FK", postedBy, Users)(_.id)
     def createdAt: Rep[DateTime] = column[DateTime]("CREATED_AT")
 
     override def * : ProvenShape[Link] = (id, url, description, postedBy, createdAt).mapTo[Link]
+
+    def postedByFK: ForeignKeyQuery[UsersTable, User] = foreignKey("postedBy_FK", postedBy, Users)(_.id)
   }
 
   val Links = TableQuery[LinksTable]
@@ -38,9 +39,8 @@ object DBSchema {
     def name: Rep[String] = column[String]("NAME")
     def email: Rep[String] = column[String]("EMAIL")
     def password: Rep[String] = column[String]("PASSWORD")
-    def createdAt: Rep[DateTime] = column[DateTime]("CREATED_AT")
 
-    override def * : ProvenShape[User] = (id, name, email, password, createdAt).mapTo[User]
+    override def * : ProvenShape[User] = (id, name, email, password).mapTo[User]
   }
 
   val Users = TableQuery[UsersTable]
@@ -49,19 +49,27 @@ object DBSchema {
     def id: Rep[Int] = column[Int]("ID", O.PrimaryKey, O.AutoInc)
     def userId: Rep[Int] = column[Int]("USER_ID")
     def linkId: Rep[Int] = column[Int]("LINK_ID")
-    def userFK: ForeignKeyQuery[UsersTable, User] = foreignKey("user_FK", userId, Users)(_.id)
-    def linkFF: ForeignKeyQuery[LinksTable, Link] = foreignKey("link_FK", linkId, Links)(_.id)
 
     override def * : ProvenShape[Vote] = (id, userId, linkId).mapTo[Vote]
+
+    def userFK: ForeignKeyQuery[UsersTable, User] = foreignKey("user_FK", userId, Users)(_.id)
+    def linkFK: ForeignKeyQuery[LinksTable, Link] = foreignKey("link_FK", linkId, Links)(_.id)
   }
 
   val Votes = TableQuery[VotesTable]
 
   // Load schema and populate sample data within this Sequence of DBActions
   val databaseSetup = DBIO.seq(
-    Links.schema.create,
     Users.schema.create,
+    Links.schema.create,
     Votes.schema.create,
+    Users.forceInsertAll(
+      Seq(
+        User(1, "Murray Rothbard", "mrothbard@mises.org", "kushtr,zjxhfdg"),
+        User(2, "Ludwig von Mises", "lvmises@mises.org", "zdhf8743hkd"),
+        User(3, "Friedrich von Hayek", "fvhayek@mises.org", "87hdjfgbzfdg0-")
+      )
+    ),
     Links.forceInsertAll(
       Seq(
         Link(1, "http://howtographql.com", "Awesome community driven GraphQL tutorial", 1, DateTime(2020, 9, 12)),
@@ -69,14 +77,13 @@ object DBSchema {
         Link(3, "https://facebook.github.io/graphql/", "GraphQL specification", 1, DateTime(2020, 12, 30))
       )
     ),
-    Users.forceInsertAll(
+    Votes.forceInsertAll(
       Seq(
-        User(1, "Murray Rothbard", "mrothbard@mises.org", "kushtr,zjxhfdg", DateTime(2000, 7, 6)),
-        User(2, "Ludwig von Mises", "lvmises@mises.org", "zdhf8743hkd", DateTime(2000, 7, 6)),
-        User(3, "Friedrich von Hayek", "fvhayek@mises.org", "87hdjfgbzfdg0-", DateTime(2001, 4, 17))
+        Vote(1, 1, 1),
+        Vote(2, 1, 2),
+        Vote(3, 3, 2)
       )
-    ),
-    Votes.forceInsertAll(Seq(Vote(1, 1, 1), Vote(2, 1, 2), Vote(3, 3, 2)))
+    )
   )
 
   def createDatabase: DAO = {

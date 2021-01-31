@@ -10,5 +10,5 @@ object GraphQLSchema {
   val Id: Argument[Int] = Argument("id", IntType)
   val Ids: Argument[Seq[Int @@ FromInput.CoercedScalaResult]] = Argument("ids", ListInputType(IntType))
 
-  val SchemaDefinition: Schema[AppContext, Unit] = Schema(QueryType)
+  val SchemaDefinition: Schema[AppContext, Unit] = Schema(QueryType, Some(MutationType))
 }
