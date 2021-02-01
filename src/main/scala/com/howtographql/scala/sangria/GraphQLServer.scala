@@ -19,7 +19,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
 
 object GraphQLServer {
-  private val dao = DBSchema.createDatabase
+  private val dao: DAO = DBSchema.createDatabase
 
   def endpoint(requestJSON: JsValue)(implicit ec: ExecutionContext): Route = {
     val JsObject(fields) = requestJSON

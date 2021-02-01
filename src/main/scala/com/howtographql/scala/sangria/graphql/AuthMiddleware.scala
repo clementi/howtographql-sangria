@@ -20,5 +20,4 @@ object AuthMiddleware extends Middleware[AppContext] with MiddlewareBeforeField[
 
     continue
   }
-
 }
