@@ -13,7 +13,6 @@ import scala.concurrent.Await
 import scala.language.postfixOps
 
 object DBSchema {
-
   implicit val dateTimeColumnType: JdbcType[DateTime] with BaseTypedType[DateTime] =
     MappedColumnType.base[DateTime, Timestamp](
       dt => new Timestamp(dt.clicks),
